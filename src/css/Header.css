@@ -1,0 +1,77 @@
+
+.site-header {
+  position: static;                      
+  border-bottom: 1px solid #91cce2;        
+  background: #ffffff;                     
+}
+
+/* Header content container */
+.header-container {
+  max-width: 80rem;                        
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Logo */
+.logo {
+  height: 64px;                             
+  width: auto;
+  max-width: 240px;
+  display: block;
+  margin-bottom: 0.5rem;                    
+}
+.logo-link { display: inline-block; }
+
+/* Title */
+.site-title {
+  margin: 0;
+  font-size: 2rem;                        
+  font-weight: 700;
+  color: #1d62a2;                           
+  text-align: center;
+}
+
+/* Instructions section */
+.instructions { width: 100%; }
+.instructions-container {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 1rem 1.5rem;
+}
+
+.instructions-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.instructions-heading {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.instructions-list {
+  margin: 0;
+  padding-left: 1.25rem;
+}
+.instructions-list li {
+  margin: 0 0 0.5rem 0;
+}
+
+/* Note under instructions */
+.instructions-note-container {
+  max-width: 80rem;
+  margin: 0rem auto 0rem auto;
+  display: flex;
+  justify-content: center;
+}
+.instructions-note {
+  text-decoration: underline;
+  font-weight: 700;
+  color: #0f172a;
+}
