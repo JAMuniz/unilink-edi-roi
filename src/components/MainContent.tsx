@@ -254,7 +254,7 @@ export default function MainContent({
                             onKeyDown={e => { if (e.key === "Enter") handleAddDocType(); }}
                           />
                           <button
-                            className="btn-icon"
+                            className="btn-icon btn-icon-info"
                             aria-label="View EDI document reference"
                             onClick={() => setShowEDITable(true)}
                             title="View EDI document reference table"

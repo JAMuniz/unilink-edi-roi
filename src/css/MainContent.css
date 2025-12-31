@@ -110,6 +110,15 @@
   color: #dc2626;                   
 }
 
+.btn-icon-info {
+  color: #3b82f6;
+}
+
+.btn-icon-info:hover {
+  background: rgba(59, 130, 246, 0.12);
+  color: #2563eb;
+}
+
 /* Inputs */
 .input {
   width: 100%;
