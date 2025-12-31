@@ -6,11 +6,11 @@ export function getTierPrices(monthlyTransactions: number): number[] {
   const prices: number[] = [];
   let remaining = monthlyTransactions;
   // Tier thresholds and rates
-  const tierThresholds = [150, 1000, 5000, 8000, 12000, 15000, 50000, 100000];
-  const tierRates = [175, 0.97, 0.74, 0.51, 0.35, 0.23, 0.15, 0.04];
+  const tierThresholds = [150, 1000, 5000, 8000, 12000, 15000, 50000, 100000, 200000, 500000, 1000000, Infinity];
+  const tierRates = [185, 1.00, 0.77, 0.53, 0.35, 0.23, 0.12, 0.04, 0.03, 0.02, 0.016, 0.010];
 
-  // Tier 1: always $175 for first 150 transactions
-  prices.push(175);
+  // Tier 1: always $185 for first 150 transactions
+  prices.push(185);
   remaining = Math.max(0, monthlyTransactions - 150);
 
   for (let i = 1; i < tierThresholds.length; i++) {
@@ -77,7 +77,7 @@ export type Totals = {
 };
 
 // -------- Constants --------
-export const DEFAULT_DOC_TYPES: DocTypeKey[] = ["850_PO", "810_INV", "855_ACK", "856_ASN"];
+export const DEFAULT_DOC_TYPES: DocTypeKey[] = [];
 
 // Extend as needed
 export const EDI_NAME_BY_CODE: Record<string, string> = {
@@ -112,9 +112,33 @@ export function genId() {
   return `id_${Date.now()}_${_idCounter++}`;
 }
 
-/** Validate 3 digits + underscore + 2+ letters, e.g. 850_PO */
+/** Validate that the document key (code or name) exists in EDI_NAME_BY_CODE crossRef table */
 export function isValidDocKey(key: string): boolean {
-  return /^\d{3}_[A-Za-z]{2,}$/.test(key.trim());
+  const trimmedKey = key.trim();
+  // Check if it's a direct code match
+  if (trimmedKey in EDI_NAME_BY_CODE) return true;
+  // Check if it's a code with suffix (e.g., "850_PO")
+  const codeOnly = trimmedKey.split('_')[0];
+  if (codeOnly in EDI_NAME_BY_CODE) return true;
+  // Check if it matches any of the friendly names (case-insensitive)
+  const lowerKey = trimmedKey.toLowerCase();
+  return Object.values(EDI_NAME_BY_CODE).some(name => name.toLowerCase() === lowerKey);
+}
+
+/** Convert user input (code or name) to normalized code format */
+export function normalizeDocKey(input: string): string {
+  const trimmed = input.trim();
+  // If it's already a code, return it
+  if (trimmed in EDI_NAME_BY_CODE) return trimmed;
+  // Check if it's a code with suffix
+  const codeOnly = trimmed.split('_')[0];
+  if (codeOnly in EDI_NAME_BY_CODE) return codeOnly;
+  // Search for matching name (case-insensitive)
+  const lowerInput = trimmed.toLowerCase();
+  for (const [code, name] of Object.entries(EDI_NAME_BY_CODE)) {
+    if (name.toLowerCase() === lowerInput) return code;
+  }
+  return trimmed;
 }
 
 /** "850_PO" → "Purchase Order (850)" (falls back to suffix if no mapping) */

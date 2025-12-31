@@ -22,16 +22,11 @@ const defaultPartners: TradingPartner[] = [
   {
     id: genId(),
     name: "Trading Partner 1",
-    docs: { "850_PO": 0, "810_INV": 0, "855_ACK": 0, "856_ASN": 0 },
+    docs: {},
   },
 ];
 
-const defaultMinutesPerDoc: MinutesPerDoc = {
-  "850_PO": 0,
-  "810_INV": 0,
-  "855_ACK": 0,
-  "856_ASN": 0,
-};
+const defaultMinutesPerDoc: MinutesPerDoc = {};
 
 const defaultTiers: Tier[] = [
   { id: genId(), label: "Tier 1", min: 1,     max: 150,     monthlyCost: 0 },

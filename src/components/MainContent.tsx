@@ -1,4 +1,4 @@
-import { Plus, Trash2, Calculator } from "lucide-react";
+import { Plus, Trash2, Calculator, Info } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import "../css/MainContent.css";
 
@@ -12,8 +12,10 @@ import type {
 import {
   getFriendlyLabelFromKey,
   isValidDocKey,
+  normalizeDocKey,
   getReachedTiers,
   getTierPrices,
+  EDI_NAME_BY_CODE,
 } from "../utils";
 
 type Props = {
@@ -83,6 +85,7 @@ export default function MainContent({
   const [newDocType, setNewDocType] = useState({ key: "" });
   const [editingDocIdx, setEditingDocIdx] = useState<number | null>(null);
   const [errorPopup, setErrorPopup] = useState<string | null>(null);
+  const [showEDITable, setShowEDITable] = useState(false);
   const openError = (msg: string) => setErrorPopup(msg);
   const closeError = () => setErrorPopup(null);
   useEffect(() => {
@@ -96,18 +99,34 @@ export default function MainContent({
     [docTypes],
   );
 
-  const handleAddDocType = () => {
-    const key = newDocType.key.trim().toUpperCase();
-    if (!isValidDocKey(key)) {
-      openError("Format must be 3 digits + '_' + 2+ letters (e.g., 850_PO).");
+  const handleSelectDocFromTable = (code: string) => {
+    if (docTypes.includes(code)) {
+      openError("That document type already exists.");
       return;
     }
-    if (docTypes.includes(key)) {
+    addDocType(code);
+    setShowEDITable(false);
+    setShowNewDocInput(false);
+    setNewDocType({ key: "" });
+  };
+
+  const handleAddDocType = () => {
+    const key = newDocType.key.trim();
+    if (!key) {
+      openError("Document name cannot be empty.");
+      return;
+    }
+    if (!isValidDocKey(key)) {
+      openError("Document name must exist in the EDI reference table.");
+      return;
+    }
+    const normalizedKey = normalizeDocKey(key);
+    if (docTypes.includes(normalizedKey)) {
       openError("That document type already exists.");
       return;
     }
 
-    addDocType(key);
+    addDocType(normalizedKey);
     setNewDocType({ key: "" });
     setShowNewDocInput(false);
   };
@@ -185,13 +204,24 @@ export default function MainContent({
                           type="number"
                           min={0}
                           className="input input-xs input-center w-20"
-                          value={p.docs[key] || 0}
-                          onChange={e =>
+                          value={p.docs[key] ?? ""}
+                          onChange={e => {
+                            const val = e.target.value;
+                            const numVal = val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
                             updatePartner(p.id, (old) => ({
                               ...old,
-                              docs: { ...old.docs, [key]: Number(e.target.value || 0) },
+                              docs: { ...old.docs, [key]: numVal },
                             }))
-                          }
+                          }}
+                          onBlur={e => {
+                            const val = e.target.value;
+                            const numVal = val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
+                            e.target.value = numVal.toString();
+                            updatePartner(p.id, (old) => ({
+                              ...old,
+                              docs: { ...old.docs, [key]: numVal },
+                            }))
+                          }}
                         />
                       </td>
                     ))}
@@ -214,14 +244,24 @@ export default function MainContent({
                   <td className="td doc-col add-doc-type-cell">
                     {showNewDocInput ? (
                       <div className="new-doc-controls">
-                        <input
-                          className="input input-xs new-doc-input"
-                          placeholder="Key (e.g. 850_PO)"
-                          value={newDocType.key}
-                          autoFocus
-                          onChange={e => setNewDocType({ key: e.target.value.toUpperCase() })}
-                          onKeyDown={e => { if (e.key === "Enter") handleAddDocType(); }}
-                        />
+                        <div>
+                          <input
+                            className="input input-xs new-doc-input"
+                            placeholder="Document code or name (e.g. 850, Invoice, Purchase Order)"
+                            value={newDocType.key}
+                            autoFocus
+                            onChange={e => setNewDocType({ key: e.target.value })}
+                            onKeyDown={e => { if (e.key === "Enter") handleAddDocType(); }}
+                          />
+                          <button
+                            className="btn-icon"
+                            aria-label="View EDI document reference"
+                            onClick={() => setShowEDITable(true)}
+                            title="View EDI document reference table"
+                          >
+                            <Info size={16} />
+                          </button>
+                        </div>
                         <div className="new-doc-actions">
                           <button className="btn btn-emerald btn-sm" onClick={handleAddDocType}>
                             + Add
@@ -268,10 +308,18 @@ export default function MainContent({
                   type="number"
                   min={0}
                   className="input"
-                  value={minutesPerDoc[k] ?? 0}
-                  onChange={(e) =>
-                    setMinutesPerDoc(old => ({ ...old, [k]: Number(e.target.value || 0) }))
-                  }
+                  value={minutesPerDoc[k] ?? ""}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const numVal = val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
+                    setMinutesPerDoc(old => ({ ...old, [k]: numVal }))
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    const numVal = val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
+                    e.target.value = numVal.toString();
+                    setMinutesPerDoc(old => ({ ...old, [k]: numVal }))
+                  }}
                 />
               </label>
             ))}
@@ -282,8 +330,18 @@ export default function MainContent({
                 type="number"
                 min={0}
                 className="input"
-                value={hourlyRate}
-                onChange={(e) => setHourlyRate(Number(e.target.value || 0))}
+                value={hourlyRate || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const numVal = val === "" ? 0 : Math.max(0, parseFloat(val) || 0);
+                  setHourlyRate(numVal);
+                }}
+                onBlur={(e) => {
+                  const val = e.target.value;
+                  const numVal = val === "" ? 0 : Math.max(0, parseFloat(val) || 0);
+                  e.target.value = numVal.toString();
+                  setHourlyRate(numVal);
+                }}
               />
             </label>
 
@@ -387,8 +445,8 @@ export default function MainContent({
                     t.min != null && t.max != null
                       ? `${t.min.toLocaleString()} - ${t.max.toLocaleString()}`
                       : "";
-                  // Tier 1 always $175, others use calculated price
-                  let price = idx === 0 ? 175 : tierPrices[idx] ?? t.monthlyCost;
+                  // Tier 1 always $185, others use calculated price
+                  let price = idx === 0 ? 185 : tierPrices[idx] ?? t.monthlyCost;
                   return (
                     <div key={t.id} className="tier-card manual-labor-form">
                       <label className="label-block">
@@ -508,7 +566,7 @@ export default function MainContent({
       </section>
 
       {errorPopup && (
-        <div className="modal-backdrop" onClick={closeError}>
+        <div className="modal-backdrop error-modal-backdrop" onClick={closeError}>
           <div
             className="modal"
             role="alertdialog"
@@ -520,6 +578,47 @@ export default function MainContent({
             <p className="modal-message">{errorPopup}</p>
             <div className="modal-actions">
               <button className="btn btn-emerald btn-sm" onClick={closeError}>OK</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEDITable && (
+        <div className="modal-backdrop" onClick={() => setShowEDITable(false)}>
+          <div
+            className="modal modal-edi-table"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="edi-table-title"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <h3 id="edi-table-title" className="modal-title">EDI Document Reference</h3>
+            <div className="edi-table-scroll">
+              <table className="edi-reference-table">
+                <thead>
+                  <tr>
+                    <th>Code</th>
+                    <th>Document Name</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(EDI_NAME_BY_CODE).map(([code, name]) => (
+                    <tr 
+                      key={code} 
+                      onClick={() => handleSelectDocFromTable(code)}
+                      className="clickable-row"
+                    >
+                      <td className="code-cell">{code}</td>
+                      <td>{name}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-secondary btn-sm" onClick={() => setShowEDITable(false)}>
+                Close
+              </button>
             </div>
           </div>
         </div>
