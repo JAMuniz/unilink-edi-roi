@@ -45,7 +45,7 @@ export default function App() {
   const [minutesPerDoc, setMinutesPerDoc] = useState<MinutesPerDoc>(defaultMinutesPerDoc);
   const [hourlyRate, setHourlyRate] = useState(25);
   const [applyErrorBuffer, setApplyErrorBuffer] = useState(true);
-  const [errorPct, setErrorPct] = useState(0.015); // fraction (1.5%)
+  const [errorPct, setErrorPct] = useState(0.02); // fraction (2%)
   const [baseMonthlyFee, setBaseMonthlyFee] = useState(0);
   const [hostedEDI, setHostedEDI] = useState(0);
   const [portalFee, setPortalFee] = useState(0);
