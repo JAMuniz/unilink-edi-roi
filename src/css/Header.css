@@ -53,6 +53,9 @@
 .instructions-heading {
   margin: 0 0 0.5rem 0;
   font-weight: 600;
+  background-color: #ADD8E6;
+  padding: 0.5rem;
+  border-radius: 4px;
 }
 
 .instructions-list {
