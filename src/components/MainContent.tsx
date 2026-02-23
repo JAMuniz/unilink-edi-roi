@@ -204,7 +204,7 @@ export default function MainContent({
                           type="number"
                           min={0}
                           className="input input-xs input-center w-20"
-                          value={p.docs[key] ?? ""}
+                          value={p.docs[key] || ""}
                           onChange={e => {
                             const val = e.target.value;
                             const numVal = val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
@@ -308,7 +308,7 @@ export default function MainContent({
                   type="number"
                   min={0}
                   className="input"
-                  value={minutesPerDoc[k] ?? ""}
+                  value={minutesPerDoc[k] || ""}
                   onChange={(e) => {
                     const val = e.target.value;
                     const numVal = val === "" ? 0 : Math.max(0, parseInt(val, 10) || 0);
@@ -351,7 +351,7 @@ export default function MainContent({
                 checked={applyErrorBuffer}
                 onChange={(e) => setApplyErrorBuffer(e.target.checked)}
               />
-              <span>Include error/rework buffer</span>
+              <span>Include error/rework occurance</span>
             </label>
 
             {applyErrorBuffer && (
@@ -362,7 +362,7 @@ export default function MainContent({
                   min={0}
                   max={100}
                   className="input"
-                  value={Number(((errorPct ?? 0) * 100).toFixed(1))}
+                  value={errorPct ? Number((errorPct * 100).toFixed(1)) : ""}
                   onChange={(e) => {
                     const pct = e.target.value === "" ? 0 : Number(e.target.value);
                     const frac = Number((pct / 100).toFixed(6));
