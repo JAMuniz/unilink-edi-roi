@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import MainContent from "./components/MainContent";
+import { exportPageToPDF } from "./utils/exportPDF";
 
 import type {
   DocTypeKey,
@@ -148,8 +149,8 @@ export default function App() {
   );
 
   return (
-    <div>
-      <Header />
+    <div id="pdf-content">
+      <Header exportToPDF={() => exportPageToPDF('pdf-content', 'edi-roi-analysis.pdf')} />
 
       <MainContent
         docTypes={docTypes}
