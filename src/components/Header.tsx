@@ -1,21 +1,38 @@
 import logo from "../img/Unilink-Logo2022 NO WHITE BOX-VECTOR.png";
+import { Download } from "lucide-react";
 import "../css/Header.css";
 
-export default function Header() {
+interface HeaderProps {
+  exportToPDF?: () => void;
+}
+
+export default function Header({ exportToPDF }: HeaderProps) {
   return (
     <>
       {/* Sticky header */}
       <header className="site-header">
         <div className="header-container">
-          <a
-            href="https://www.edisaves.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="logo-link"
-          >
-            <img src={logo} alt="UniLink Logo" className="logo" />
-          </a>
-          <h1 className="site-title">EDI ROI Calculator</h1>
+          <div className="header-branding">
+            <a
+              href="https://www.edisaves.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="logo-link"
+            >
+              <img src={logo} alt="UniLink Logo" className="logo" />
+            </a>
+            <h1 className="site-title">EDI ROI Calculator</h1>
+          </div>
+          {exportToPDF && (
+            <button
+              onClick={exportToPDF}
+              className="export-button"
+              title="Export the analysis to PDF"
+            >
+              <Download size={20} />
+              <span>Export to PDF</span>
+            </button>
+          )}
         </div>
       </header>
 
